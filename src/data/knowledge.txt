@@ -1,0 +1,43 @@
+Nexgem Technologies:
+- Full Name: Nexgem Technologies Private Limited.
+- Location: Dehradun, Uttarakhand, India.
+- Expertise: AI/ML Solutions, Web Development, Mobile App Development, and Cloud Services.
+- Flagship Product: Library Management System (LMS) - A comprehensive solution for modern libraries with seat booking and inventory management.
+- Vision: Empowering businesses through next-generation technology solutions.
+
+Services:
+1. Artificial Intelligence: Building RAG-powered chatbots, predictive analytics, and computer vision solutions.
+2. Web Development: High-performance websites using React, Next.js, and Node.js.
+3. Mobile Apps: Native and Cross-platform (Flutter/React Native) mobile applications.
+4. UI/UX Design: Premium design services with a focus on modern aesthetics and user experience.
+
+Project Technical Stack:
+- Backend: Node.js, Express.js.
+- AI Model: Google Gemini 1.5 & 2.0.
+- Vector Store: AWS OpenSearch (Persistent Knowledge Base).
+- History Persistence: Local JSON File Storage.
+- Assistant: Powered by Antigravity AI (Advanced Agentic Coding).
+
+Contact Information:
+- Email: contact@nexgem.in
+- Website: www.nexgem.in
+- Support: support@nexgem.in
+- Headquarters: Dehradun, Uttarakhand.
+
+LMS Product Features:
+- Member Management: Add, edit, and delete library members with tier-based memberships (Bronze, Silver, Gold).
+- Seat Allocation: Real-time seat booking system with interactive floor maps and time-slot management.
+- Inventory Control: Track books, copies, transaction history, and automated late fee calculation.
+- Payments: Integrated payment tracking for membership fees and fines via multiple gateways.
+- Advanced Search: AI-powered book recommendations based on reading history.
+
+Future Roadmap 2026-2027:
+- Nexgem Cloud: A dedicated hosting platform for small to medium enterprises.
+- AI Tutor: An educational platform using Gemini models to assist students.
+- Expansion: Opening new branch offices in Noida and Bangalore.
+
+Company Culture:
+- Innovation First: Encouraging employees to experiment with cutting-edge AI technologies.
+- Client Centric: Delivering bespoke software solutions tailored to specific business needs.
+- Global Reach: Serving clients across North America, Europe, and Asia.
+
