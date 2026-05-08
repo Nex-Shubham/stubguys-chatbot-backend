@@ -1,0 +1,1481 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Admin {
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  userId    String   @unique
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Agenda {
+  id          String   @id
+  title       String
+  eventTime   DateTime
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  eventId     String
+  order       Int      @default(0)
+  Event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+model Amenity {
+  id        String      @id
+  type      AmenityType
+  createdAt DateTime    @default(now())
+  updatedAt DateTime
+  eventId   String
+  Event     Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+model Article {
+  id              String           @id
+  title           String
+  slug            String           @unique
+  tags            String[]
+  content         String
+  articleStatus   Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime
+  categoryId      String?
+  ArticleCategory ArticleCategory? @relation(fields: [categoryId], references: [id])
+
+  @@index([articleStatus])
+  @@index([createdAt])
+  @@index([slug])
+}
+
+model ArticleCategory {
+  id           String    @id
+  categoryname String
+  user         USERS
+  description  String
+  status       Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime
+  Article      Article[]
+
+  @@index([createdAt])
+  @@index([status])
+}
+
+model Attandee {
+  id                     String                   @id
+  email                  String?                  @unique
+  phone                  String?
+  password               String?                  @db.VarChar(100)
+  lastName               String?
+  isVerified             Boolean                  @default(false)
+  isPhoneVerified        Boolean                  @default(false)
+  isEmailVerified        Boolean                  @default(false)
+  otpCode                String?                  @db.VarChar(100)
+  otpExpiry              DateTime?
+  provider               String?
+  providerId             String?
+  googleRefreshToken     String?
+  facebookAccessToken    String?
+  facebookRefreshToken   String?
+  lastLogin              DateTime?
+  registrationType       String                   @default("email")
+  selectRole             Role                     @default(ATTENDEE)
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime
+  name                   String?
+  latitude               Float?
+  longitude              Float?
+  OrganizerEmailCampaign OrganizerEmailCampaign[]
+}
+
+model AttendeeProfile {
+  id              String               @id
+  attendeeId      String               @unique
+  name            String
+  email           String               @unique
+  phone           String?
+  recentEvent     String?
+  recentEventDate DateTime?
+  status          AttandeProfileStatus @default(NOT_CHECKED_IN)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime
+  gender          String?
+  age             Int?
+  dob             DateTime?
+  image           String?
+  profileStatus   Status               @default(ACTIVE)
+}
+
+model AuditLog {
+  id         String   @id
+  adminId    String
+  action     String
+  targetType String?
+  targetId   String?
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+  userAgent  String?
+  User       User     @relation(fields: [adminId], references: [id])
+
+  @@index([action])
+  @@index([adminId])
+  @@index([targetId])
+}
+
+model Banner {
+  id          String   @id
+  title       String
+  description String
+  image       String
+  url         String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  page        PageType
+
+  @@index([createdAt])
+  @@index([isActive])
+}
+
+model Booking {
+  id              String            @id
+  eventId         String
+  userId          String
+  totalAmount     Float
+  status          BookingStatus     @default(PENDING)
+  paymentId       String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime
+  stripeSessionId String?           @db.VarChar(255)
+  Event           Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  User            User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  BookingAttendee BookingAttendee[]
+  CouponUsage     CouponUsage?
+  RefundRequest   RefundRequest?
+
+  @@index([eventId])
+  @@index([status])
+  @@index([stripeSessionId])
+  @@index([userId])
+}
+
+model BookingAttendee {
+  id            String      @id
+  bookingId     String
+  eventTicketId String
+  name          String
+  email         String
+  isCheckedIn   Boolean     @default(false)
+  checkedInAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime
+  Booking       Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  EventTicket   EventTicket @relation(fields: [eventTicketId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([eventTicketId])
+}
+
+model Campaign {
+  id                     String                   @id
+  name                   String
+  description            String?
+  eventId                String
+  startDate              DateTime
+  endDate                DateTime
+  ageRange               AgeRange[]
+  gender                 Gender[]
+  targetCities           String[]
+  status                 CampaignStatusEnum       @default(PENDING)
+  budgetType             BudgetType?
+  budgetAmount           Float?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime
+  organizerId            String
+  promotionPlacement     PromotionPlacement[]
+  radius                 Float?
+  stripeSessionId        String?                  @db.VarChar(255)
+  interests              String[]
+  Event                  Event                    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  Organizer              Organizer                @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  OrganizerEmailCampaign OrganizerEmailCampaign[]
+
+  @@index([eventId])
+  @@index([organizerId])
+  @@index([status])
+}
+
+model Complaint {
+  id          String   @id
+  title       String
+  description String
+  status      String   @default("OPEN")
+  priority    String   @default("MEDIUM")
+  userId      String
+  eventId     String?
+  attachments String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+
+  @@index([eventId])
+  @@index([status])
+  @@index([userId])
+}
+
+model Conversation {
+  id                                      String          @id
+  messageRequestId                        String          @unique
+  attendeeId                              String
+  organizerUserId                         String
+  createdAt                               DateTime        @default(now())
+  updatedAt                               DateTime
+  User_Conversation_attendeeIdToUser      User            @relation("Conversation_attendeeIdToUser", fields: [attendeeId], references: [id])
+  MessageRequest                          MessageRequest  @relation(fields: [messageRequestId], references: [id])
+  User_Conversation_organizerUserIdToUser User            @relation("Conversation_organizerUserIdToUser", fields: [organizerUserId], references: [id])
+  DirectMessage                           DirectMessage[]
+
+  @@index([attendeeId])
+  @@index([organizerUserId])
+}
+
+model Coupon {
+  id                    String        @id
+  name                  String
+  code                  String        @unique
+  type                  CouponType
+  amount                Float
+  minSpent              Float         @default(0)
+  expiryDate            DateTime
+  totalRedemptionLimit  Int?
+  usagePerCustomerLimit Int?
+  isActive              Boolean       @default(true)
+  organizerId           String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime
+  isAdminCreated        Boolean       @default(false)
+  remarks               String?
+  status                CouponStatus  @default(APPROVED)
+  Organizer             Organizer?    @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  CouponUsage           CouponUsage[]
+  Event                 Event[]
+
+  @@index([code])
+  @@index([organizerId])
+}
+
+model CouponUsage {
+  id             String   @id
+  couponId       String
+  userId         String
+  bookingId      String   @unique
+  discountAmount Float
+  finalAmount    Float
+  createdAt      DateTime @default(now())
+  Booking        Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  Coupon         Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  User           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([couponId])
+  @@index([userId])
+}
+
+model DeviceToken {
+  id         String         @id
+  userId     String
+  token      String         @unique
+  platform   DevicePlatform
+  deviceId   String?
+  isActive   Boolean        @default(true)
+  lastUsedAt DateTime       @default(now())
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime
+  User       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, token])
+  @@index([lastUsedAt])
+  @@index([token])
+  @@index([userId])
+}
+
+model DirectMessage {
+  id             String       @id
+  conversationId String
+  senderId       String
+  content        String
+  createdAt      DateTime     @default(now())
+  isRead         Boolean      @default(false)
+  readAt         DateTime?
+  attachments    Json         @default("[]")
+  Conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  User           User         @relation(fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
+}
+
+model DummyExport {
+  id   Int               @id @default(autoincrement())
+  slug ContentPolicySlug
+}
+
+model Event {
+  id                                    String                  @id
+  title                                 String
+  eventType                             EventType
+  frequency                             Frequency?
+  date                                  DateTime?
+  startTime                             DateTime?
+  endTime                               DateTime?
+  startDate                             DateTime?
+  endDate                               DateTime?
+  sameTimeAllDays                       Boolean                 @default(false)
+  description                           String
+  coverImage                            String
+  locationId                            String?
+  createdAt                             DateTime                @default(now())
+  updatedAt                             DateTime
+  eventCategoryId                       String?
+  eventSubCategoryId                    String?
+  organizerId                           String
+  faqs                                  Json?
+  weekDays                              eventWeek[]
+  amenityTypes                          Json?
+  agendaItems                           Json?
+  refundPolicy                          Json?
+  mediaItems                            Json?
+  sponsors                              Json?
+  tickets                               Json?
+  shareLink                             String?                 @unique
+  status                                EventStatus             @default(PUBLISHED)
+  meetingUrl                            String?
+  targetRegion                          String?
+  stripeProductId                       String?                 @db.VarChar(255)
+  keywords                              String[]                @default([])
+  scheduledPublishDate                  DateTime?
+  Agenda                                Agenda[]
+  Amenity                               Amenity[]
+  Booking                               Booking[]
+  Campaign                              Campaign[]
+  EventCategory                         EventCategory?          @relation(fields: [eventCategoryId], references: [id])
+  EventSubCategory                      EventSubCategory?       @relation(fields: [eventSubCategoryId], references: [id])
+  Location                              Location?               @relation(fields: [locationId], references: [id])
+  Organizer                             Organizer               @relation(fields: [organizerId], references: [id])
+  EventDate                             EventDate[]
+  EventFeedback                         EventFeedback[]
+  EventTicket                           EventTicket[]
+  ExclusiveDeal                         ExclusiveDeal[]
+  FAQ                                   FAQ[]
+  FavoriteEvent                         FavoriteEvent[]
+  Media                                 Media[]
+  Promotion                             Promotion[]
+  RefundPolicy                          RefundPolicy[]
+  RefundRequest                         RefundRequest[]
+  Sponsor                               Sponsor[]
+  StubConnectConnection                 StubConnectConnection[]
+  StubConnectEnrollment                 StubConnectEnrollment[]
+  StubConnectMatch                      StubConnectMatch[]
+  StubConnectSwipe                      StubConnectSwipe[]
+  Ticket_Ticket_eventIdToEvent          Ticket[]                @relation("Ticket_eventIdToEvent")
+  Ticket_Ticket_organizerEventIdToEvent Ticket[]                @relation("Ticket_organizerEventIdToEvent")
+  Coupon                                Coupon[]
+
+  @@index([createdAt])
+  @@index([eventCategoryId])
+  @@index([eventSubCategoryId])
+  @@index([locationId])
+  @@index([organizerId])
+  @@index([shareLink])
+  @@index([status, createdAt])
+  @@index([status])
+  @@index([targetRegion])
+}
+
+model EventCategory {
+  id               String             @id
+  code             String             @unique
+  name             String             @unique
+  image            String
+  description      String
+  isActive         Boolean            @default(true)
+  createdBy        String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  Event            Event[]
+  EventSubCategory EventSubCategory[]
+  UserInterest     UserInterest[]
+}
+
+model EventDate {
+  id        String      @id
+  eventDate DateTime
+  startTime DateTime
+  endTime   DateTime
+  weekDays  eventWeek[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime
+  eventId   String
+  Event     Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+model EventFeature {
+  id           String   @id
+  amenities    Boolean  @default(false)
+  agenda       Boolean  @default(false)
+  faq          Boolean  @default(false)
+  refundPolicy Boolean  @default(false)
+  media        Boolean  @default(false)
+  sponsors     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+}
+
+model EventFeedback {
+  id         String   @id
+  eventId    String
+  attendeeId String
+  rating     Float    @default(0)
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+  User       User     @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
+  Event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, attendeeId])
+  @@index([attendeeId])
+  @@index([eventId])
+}
+
+model EventSubCategory {
+  id               String         @id
+  subCategoryName  String         @unique
+  subCategoryImage String
+  description      String
+  isActive         Boolean        @default(true)
+  createdBy        String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime
+  eventCategoryId  String?
+  Event            Event[]
+  EventCategory    EventCategory? @relation(fields: [eventCategoryId], references: [id])
+}
+
+model EventTicket {
+  id              String            @id
+  price           Float
+  quantity        Int
+  maxPerUser      Int?
+  description     String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime
+  eventId         String
+  ticketName      String            @default("GENERAL")
+  soldQuantity    Int               @default(0)
+  totalQuantity   Int               @default(0)
+  order           Int               @default(0)
+  stripePriceId   String?           @db.VarChar(255)
+  stripeProductId String?           @db.VarChar(255)
+  BookingAttendee BookingAttendee[]
+  Event           Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  Promotion       Promotion[]
+
+  @@index([eventId])
+}
+
+model ExclusiveDeal {
+  id              String     @id
+  eventId         String
+  title           String
+  description     String
+  imageUrl        String?
+  status          DealStatus @default(PENDING)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime
+  reviewQuestions Json?
+  Event           Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([status])
+}
+
+model FAQ {
+  id             String       @id
+  question       String
+  answer         String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime
+  eventId        String?
+  targetAudience Articleusers @default(ATTENDEE)
+  Event          Event?       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+model FavoriteEvent {
+  id        String   @id
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+  Event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+  @@index([userId])
+}
+
+model GuestUser {
+  id        String   @id
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+
+  @@index([email])
+}
+
+model Location {
+  id               String       @id
+  locationType     LocationType
+  formattedAddress String
+  latitude         Float?
+  longitude        Float?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime
+  Event            Event[]
+}
+
+model Media {
+  id        String   @id
+  mediaImg  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  eventId   String
+  Event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+model MessageRequest {
+  id           String               @id
+  senderId     String
+  organizerId  String
+  name         String
+  email        String
+  message      String
+  status       MessageRequestStatus @default(PENDING)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime
+  Conversation Conversation?
+  Organizer    Organizer            @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  User         User                 @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, organizerId])
+  @@index([organizerId])
+}
+
+model Notification {
+  id        String           @id
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime
+  User      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([userId, isRead])
+}
+
+model Organizer {
+  id                     String                   @id
+  type                   OrganizerType
+  name                   String
+  logoUrl                String?
+  country                String?
+  bio                    String?
+  websiteLink            String?
+  facebookLink           String?
+  instagramLink          String?
+  twitterLink            String?
+  fileUrl                String
+  fileType               String?
+  verification           VerificationStatus?
+  remarks                String?
+  reviewedAt             DateTime?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime
+  userId                 String                   @unique
+  status                 Status                   @default(ACTIVE)
+  platformFeePercentage  Float                    @default(10.0)
+  stripeAccountId        String?                  @db.VarChar(255)
+  stripeConnectStatus    StripeConnectStatus      @default(PENDING)
+  bankDetails            Json?
+  isAutoRenewEnabled     Boolean                  @default(false)
+  planExpiryDate         DateTime?
+  subscriptionPlanId     String?
+  payoutAnchor           Int?
+  payoutDelayDays        Int                      @default(2)
+  payoutInterval         String                   @default("manual")
+  dailyCreditsUsed       Int                      @default(0)
+  lastCreditReset        DateTime?
+  allowExtraCredits      Boolean                  @default(false)
+  extraCreditsCostTotal  Float                    @default(0.0)
+  purchasedCredits       Int                      @default(0)
+  extraDailyCredits      Int                      @default(0)
+  Campaign               Campaign[]
+  Coupon                 Coupon[]
+  Event                  Event[]
+  MessageRequest         MessageRequest[]
+  SubscriptionPlan       SubscriptionPlan?        @relation(fields: [subscriptionPlanId], references: [id])
+  User                   User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  OrganizerEmailCampaign OrganizerEmailCampaign[]
+  OrganizerFollow        OrganizerFollow[]
+  OrganizerKyc           OrganizerKyc[]
+  OrganizerWallet        OrganizerWallet?
+  RefundRequest          RefundRequest[]
+  SubscriptionRenewal    SubscriptionRenewal[]
+  WalletTransaction      WalletTransaction[]
+}
+
+model OrganizerEmailCampaign {
+  id           String     @id
+  campaignName String
+  subject      String
+  body         String
+  eventIds     String[]
+  organizerId  String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime
+  campaignId   String?
+  Campaign     Campaign?  @relation(fields: [campaignId], references: [id])
+  Organizer    Organizer  @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  Attandee     Attandee[]
+
+  @@index([campaignId])
+  @@index([createdAt])
+  @@index([organizerId])
+}
+
+model OrganizerFollow {
+  id          String    @id
+  attendeeId  String
+  organizerId String
+  createdAt   DateTime  @default(now())
+  User        User      @relation(fields: [attendeeId], references: [id], onDelete: Cascade)
+  Organizer   Organizer @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+
+  @@unique([attendeeId, organizerId])
+  @@index([organizerId])
+}
+
+model OrganizerKyc {
+  id            String             @id
+  organizerId   String
+  type          OrganizerType
+  name          String
+  logoUrl       String?
+  country       String?
+  bio           String?
+  websiteLink   String?
+  facebookLink  String?
+  instagramLink String?
+  twitterLink   String?
+  fileUrl       String
+  fileType      String?
+  verification  VerificationStatus
+  remarks       String?
+  reviewedAt    DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime
+  Organizer     Organizer          @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+}
+
+model OrganizerProfile {
+  id             String   @id
+  orgId          String   @unique
+  organizerName  String
+  email          String   @unique
+  phone          String
+  totalEvents    Int      @default(0)
+  status         Status   @default(ACTIVE)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime
+  profilePicture String?
+}
+
+model OrganizerWallet {
+  id            String    @id
+  organizerId   String    @unique
+  balance       Float     @default(0.0)
+  currency      String    @default("usd")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime
+  frozenBalance Float     @default(0.0)
+  Organizer     Organizer @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+
+  @@index([organizerId])
+}
+
+model Permissions {
+  id        String   @id
+  roleId    String   @unique
+  navItems  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  Roles     Roles    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+}
+
+model Policy {
+  id        String   @id
+  title     String
+  slug      String   @unique
+  content   String
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+
+model Promotion {
+  id            String        @id
+  promotionType PromotionType
+  discounttype  DiscountType
+  startDate     DateTime
+  endDate       DateTime
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime
+  eventId       String?
+  discountValue Float         @default(0)
+  eventTicketId String?
+  Event         Event?        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  EventTicket   EventTicket?  @relation(fields: [eventTicketId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([eventTicketId])
+  @@index([promotionType])
+  @@index([startDate, endDate])
+}
+
+model RefundPolicy {
+  id        String   @id
+  title     String   @default("Refund Policy")
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  eventId   String
+  Event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+model RefundRequest {
+  id                 String              @id
+  bookingId          String              @unique
+  attendeeId         String
+  organizerId        String
+  eventId            String
+  amount             Float
+  reason             String?
+  status             RefundRequestStatus @default(PENDING)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime
+  escalationTicketId String?
+  User               User                @relation(fields: [attendeeId], references: [id])
+  Booking            Booking             @relation(fields: [bookingId], references: [id])
+  Event              Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  Organizer          Organizer           @relation(fields: [organizerId], references: [id])
+
+  @@index([attendeeId])
+  @@index([organizerId])
+}
+
+model Roles {
+  id          String       @id
+  role_type   String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime
+  Permissions Permissions?
+  User        User[]
+}
+
+model SavedPaymentMethod {
+  id               String   @id
+  userId           String
+  stripeCustomerId String
+  paymentMethodId  String   @unique
+  last4            String?
+  brand            String?
+  expMonth         Int?
+  expYear          Int?
+  type             String?
+  isDefault        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime
+  User             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([paymentMethodId])
+  @@index([userId])
+}
+
+model Session {
+  id         String   @id
+  userId     String
+  token      String   @unique
+  ip         String?
+  userAgent  String?
+  deviceName String?
+  platform   String?
+  city       String?
+  country    String?
+  latitude   Float?
+  longitude  Float?
+  isActive   Boolean  @default(true)
+  lastUsedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isActive])
+  @@index([userId])
+  @@index([userId, isActive])
+}
+
+model SmsCampaign {
+  id          String         @id
+  name        String
+  message     String
+  selectUsers Role[]
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime
+  sentAt      DateTime?
+  createdBy   String
+  status      CampaignStatus @default(SCHEDULED)
+  scheduledAt DateTime?
+  title       String?
+  type        CampaignType   @default(SMS)
+
+  @@index([createdAt])
+  @@index([status])
+  @@index([type])
+}
+
+model Sponsor {
+  id        String   @id
+  logo      String
+  name      String
+  url       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  eventId   String
+  Event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+model StubConnectConnection {
+  id                                          String           @id
+  fromUserId                                  String
+  toUserId                                    String
+  eventId                                     String
+  status                                      ConnectionStatus @default(PENDING)
+  createdAt                                   DateTime         @default(now())
+  updatedAt                                   DateTime
+  Event                                       Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  User_StubConnectConnection_fromUserIdToUser User             @relation("StubConnectConnection_fromUserIdToUser", fields: [fromUserId], references: [id], onDelete: Cascade)
+  User_StubConnectConnection_toUserIdToUser   User             @relation("StubConnectConnection_toUserIdToUser", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId, eventId])
+  @@index([eventId])
+  @@index([toUserId])
+}
+
+model StubConnectEnrollment {
+  id                String   @id
+  userId            String
+  eventId           String
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime
+  bookingAttendeeId String?
+  enrolledByUserId  String?
+  Event             Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  User              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+}
+
+model StubConnectMatch {
+  id                                  String               @id
+  user1Id                             String
+  user2Id                             String
+  eventId                             String
+  createdAt                           DateTime             @default(now())
+  Event                               Event                @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  User_StubConnectMatch_user1IdToUser User                 @relation("StubConnectMatch_user1IdToUser", fields: [user1Id], references: [id], onDelete: Cascade)
+  User_StubConnectMatch_user2IdToUser User                 @relation("StubConnectMatch_user2IdToUser", fields: [user2Id], references: [id], onDelete: Cascade)
+  StubConnectMessage                  StubConnectMessage[]
+
+  @@unique([user1Id, user2Id, eventId])
+  @@index([eventId])
+}
+
+model StubConnectMessage {
+  id               String           @id
+  matchId          String
+  senderId         String
+  content          String
+  createdAt        DateTime         @default(now())
+  deliveredAt      DateTime?
+  isDelivered      Boolean          @default(false)
+  isRead           Boolean          @default(false)
+  readAt           DateTime?
+  status           MessageStatus    @default(SENT)
+  attachments      Json             @default("[]")
+  StubConnectMatch StubConnectMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  User             User             @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([matchId])
+}
+
+model StubConnectProfile {
+  id             String   @id
+  userId         String   @unique
+  images         String[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime
+  additionalInfo Json?    @default("[]")
+  languages      String[]
+  location       String?
+  about_me       String?
+  User           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StubConnectSwipe {
+  id                                   String    @id
+  swiperId                             String
+  swipedId                             String
+  eventId                              String
+  type                                 SwipeType
+  createdAt                            DateTime  @default(now())
+  Event                                Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  User_StubConnectSwipe_swipedIdToUser User      @relation("StubConnectSwipe_swipedIdToUser", fields: [swipedId], references: [id], onDelete: Cascade)
+  User_StubConnectSwipe_swiperIdToUser User      @relation("StubConnectSwipe_swiperIdToUser", fields: [swiperId], references: [id], onDelete: Cascade)
+
+  @@unique([swiperId, swipedId, eventId])
+  @@index([eventId])
+}
+
+model SubscriptionPlan {
+  id                  String                @id
+  name                String
+  price               Float                 @default(0.0)
+  interval            String                @default("MONTHLY")
+  features            Json
+  description         String?
+  isActive            Boolean               @default(true)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime
+  stripePriceId       String?               @db.VarChar(255)
+  stripeProductId     String?               @db.VarChar(255)
+  extraCreditPrice    Float                 @default(0.0)
+  Organizer           Organizer[]
+  SubscriptionRenewal SubscriptionRenewal[]
+}
+
+model SubscriptionRenewal {
+  id                 String           @id
+  organizerId        String
+  subscriptionPlanId String
+  renewalDate        DateTime
+  status             String           @default("PENDING")
+  amount             Float
+  stripeChargeId     String?          @db.VarChar(255)
+  errorMessage       String?
+  renewalType        String           @default("AUTO")
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime
+  Organizer          Organizer        @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  SubscriptionPlan   SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id], onDelete: Cascade)
+
+  @@index([organizerId])
+  @@index([renewalDate])
+  @@index([status])
+  @@index([subscriptionPlanId])
+}
+
+model SystemPolicy {
+  id        String           @id
+  type      SystemPolicyType @unique
+  settings  Json
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime
+}
+
+model Ticket {
+  id                                   String            @id
+  issue                                String
+  category                             ClaimCategory
+  description                          String
+  status                               ClaimStatus
+  createdAt                            DateTime          @default(now())
+  updatedAt                            DateTime
+  user                                 String?
+  ticketNo                             String            @unique
+  attachments                          String?
+  links                                Json?
+  assignedStaffId                      String?
+  attendeeId                           String?
+  eventId                              String?
+  organizerEventId                     String?
+  ticketType                           SupportTicketType @default(GENERAL)
+  User_Ticket_assignedStaffIdToUser    User?             @relation("Ticket_assignedStaffIdToUser", fields: [assignedStaffId], references: [id])
+  User_Ticket_attendeeIdToUser         User?             @relation("Ticket_attendeeIdToUser", fields: [attendeeId], references: [id])
+  Event_Ticket_eventIdToEvent          Event?            @relation("Ticket_eventIdToEvent", fields: [eventId], references: [id], onDelete: Cascade)
+  Event_Ticket_organizerEventIdToEvent Event?            @relation("Ticket_organizerEventIdToEvent", fields: [organizerEventId], references: [id], onDelete: Cascade)
+  TicketMessage                        TicketMessage[]
+}
+
+model TicketMessage {
+  id        String   @id
+  ticketId  String
+  userId    String
+  userName  String
+  userRole  String
+  message   String
+  link      String?
+  photoUrl  String?
+  createdAt DateTime @default(now())
+  Ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+model User {
+  id                                                           String                  @id
+  name                                                         String
+  email                                                        String                  @unique
+  phone                                                        String?
+  password                                                     String?
+  gender                                                       String?
+  dob                                                          DateTime?
+  createdAt                                                    DateTime                @default(now())
+  updatedAt                                                    DateTime
+  facebookAccessToken                                          String?
+  facebookRefreshToken                                         String?
+  googleRefreshToken                                           String?
+  isEmailVerified                                              Boolean                 @default(false)
+  isPhoneVerified                                              Boolean                 @default(false)
+  isVerified                                                   Boolean                 @default(false)
+  lastLogin                                                    DateTime?
+  lastName                                                     String?
+  latitude                                                     Float?
+  longitude                                                    Float?
+  otpCode                                                      String?                 @db.VarChar(100)
+  otpExpiry                                                    DateTime?
+  provider                                                     String?
+  providerId                                                   String?
+  registrationType                                             String                  @default("email")
+  roleId                                                       String
+  isTemporaryPassword                                          Boolean                 @default(false)
+  isGuestUser                                                  Boolean                 @default(false)
+  activeRole                                                   String?
+  roleIds                                                      String[]                @default([])
+  age                                                          Int?
+  deletionRequestedAt                                          DateTime?
+  status                                                       Status                  @default(ACTIVE)
+  stripeCustomerId                                             String?                 @db.VarChar(255)
+  profileImage                                                 String?
+  Admin                                                        Admin?
+  AuditLog                                                     AuditLog[]
+  Booking                                                      Booking[]
+  Conversation_Conversation_attendeeIdToUser                   Conversation[]          @relation("Conversation_attendeeIdToUser")
+  Conversation_Conversation_organizerUserIdToUser              Conversation[]          @relation("Conversation_organizerUserIdToUser")
+  CouponUsage                                                  CouponUsage[]
+  DeviceToken                                                  DeviceToken[]
+  DirectMessage                                                DirectMessage[]
+  EventFeedback                                                EventFeedback[]
+  FavoriteEvent                                                FavoriteEvent[]
+  MessageRequest                                               MessageRequest[]
+  Notification                                                 Notification[]
+  Organizer                                                    Organizer?
+  OrganizerFollow                                              OrganizerFollow[]
+  RefundRequest                                                RefundRequest[]
+  SavedPaymentMethod                                           SavedPaymentMethod[]
+  Session                                                      Session[]
+  StubConnectConnection_StubConnectConnection_fromUserIdToUser StubConnectConnection[] @relation("StubConnectConnection_fromUserIdToUser")
+  StubConnectConnection_StubConnectConnection_toUserIdToUser   StubConnectConnection[] @relation("StubConnectConnection_toUserIdToUser")
+  StubConnectEnrollment                                        StubConnectEnrollment[]
+  StubConnectMatch_StubConnectMatch_user1IdToUser              StubConnectMatch[]      @relation("StubConnectMatch_user1IdToUser")
+  StubConnectMatch_StubConnectMatch_user2IdToUser              StubConnectMatch[]      @relation("StubConnectMatch_user2IdToUser")
+  StubConnectMessage                                           StubConnectMessage[]
+  StubConnectProfile                                           StubConnectProfile?
+  StubConnectSwipe_StubConnectSwipe_swipedIdToUser             StubConnectSwipe[]      @relation("StubConnectSwipe_swipedIdToUser")
+  StubConnectSwipe_StubConnectSwipe_swiperIdToUser             StubConnectSwipe[]      @relation("StubConnectSwipe_swiperIdToUser")
+  Ticket_Ticket_assignedStaffIdToUser                          Ticket[]                @relation("Ticket_assignedStaffIdToUser")
+  Ticket_Ticket_attendeeIdToUser                               Ticket[]                @relation("Ticket_attendeeIdToUser")
+  Roles                                                        Roles                   @relation(fields: [roleId], references: [id])
+  UserInterest                                                 UserInterest[]
+
+  @@index([createdAt])
+  @@index([phone])
+  @@index([roleId])
+}
+
+model UserInterest {
+  id            String        @id
+  userId        String
+  categoryId    String
+  createdAt     DateTime      @default(now())
+  EventCategory EventCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  User          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId])
+}
+
+model WalletTransaction {
+  id               String          @id
+  walletId         String
+  organizerId      String
+  amount           Float
+  type             TransactionType
+  description      String?
+  referenceId      String?
+  createdAt        DateTime        @default(now())
+  fee              Float           @default(0.0)
+  method           PayoutMethod?
+  stripeTransferId String?
+  stripeFee        Float           @default(0.0)
+  Organizer        Organizer       @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+
+  @@index([organizerId])
+  @@index([walletId])
+}
+
+enum AgeRange {
+  AGE_18_24
+  AGE_25_34
+  AGE_35_44
+  AGE_45_PLUS
+}
+
+enum AmenityType {
+  RESTROOMS
+  FOOD_BEVERAGE
+  LOCKER_FACILITY
+  PARKING_AVAILABLE
+  WHEEL_CHAIR
+}
+
+enum Articleusers {
+  ORGANIZER
+  ATTENDEE
+}
+
+enum AttandeProfileStatus {
+  CHECKED_IN
+  NOT_CHECKED_IN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  FAILED
+  REFUNDED
+}
+
+enum BudgetType {
+  PER_DAY
+  ONE_TIME
+}
+
+enum CampaignStatus {
+  SCHEDULED
+  SENDING
+  COMPLETED
+  FAILED
+}
+
+enum CampaignStatusEnum {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+enum CampaignType {
+  SMS
+  EMAIL
+  NOTIFICATION
+}
+
+enum Category {
+  TICKET_PAYMENTS
+  HEALTH
+  BUSINESS
+  ENTERTAINMENT
+  SPORTS
+  EDUCATION
+  LIFESTYLE
+  TRAVEL
+  FOOD
+  POLITICS
+}
+
+enum ClaimCategory {
+  PAYMENTS
+  REFUNDS
+  TECHNICAL
+  OTHER
+}
+
+enum ClaimStatus {
+  OPEN
+  ONGOING
+  RESOLVED
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum ContentPolicySlug {
+  privacy_policy       @map("privacy-policy")
+  terms_and_conditions @map("terms-and-conditions")
+  refund_policy        @map("refund-policy")
+  cookies_policy       @map("cookies-policy")
+}
+
+enum CouponStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CouponType {
+  FIXED
+  PERCENTAGE
+}
+
+enum DealStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  UNDER_REVIEW
+}
+
+enum DevicePlatform {
+  WEB
+  ANDROID
+  IOS
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FLAT
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  SCHEDULED
+  COMPLETED
+}
+
+enum EventType {
+  ONE_TIME
+  MULTIPLE_OCCURRING
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  BY_WEEKLY
+  CUSTOM
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum LocationType {
+  PHYSICAL
+  VIRTUAL
+  TBA
+}
+
+enum MessageRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  TICKET_CHECKIN
+  KYC_STATUS_UPDATE
+  EVENT_CREATED
+  NEW_SUPPORT_TICKET
+  SUPPORT_TICKET_MESSAGE
+  SUPPORT_TICKET_STATUS
+  NEW_MATCH
+  NEW_DIRECT_MESSAGE
+  STUB_CONNECT_ENROLLMENT
+  SYSTEM_ANNOUNCEMENT
+}
+
+enum OrganizerType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum PageType {
+  homepage
+  aboutpage
+  contactpage
+}
+
+enum PayoutMethod {
+  STANDARD
+  INSTANT
+}
+
+enum PromotionPlacement {
+  HOMEPAGE
+  POPULAR_EVENTS
+  SEARCHPAGE
+}
+
+enum PromotionType {
+  EXCLUSIVE
+  HOT_DEAL
+}
+
+enum RefundRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ESCALATED
+  REFUNDED
+  PROCESSED
+  REQUESTED
+}
+
+enum Role {
+  ORGANIZER
+  ATTENDEE
+}
+
+enum Status {
+  ACTIVE
+  SUSPENDED
+  DELETION_REQUESTED
+}
+
+enum StripeConnectStatus {
+  PENDING
+  CONNECTED
+  ACTION_REQUIRED
+  REJECTED
+}
+
+enum SupportTicketType {
+  GENERAL
+  PAYOUT
+  ORDER_RELATED
+  PAYMENTS
+}
+
+enum SwipeType {
+  LIKE
+  DISLIKE
+}
+
+enum SystemPolicyType {
+  REFUND_WINDOW
+  PAYOUT_LIMITS
+  SUBSCRIPTION_RENEWAL
+  MARKETING_AD
+  MIN_DEPOSIT
+  PLATFORM_FEE
+  EXCLUSIVE_DEAL_QUESTIONS
+}
+
+enum TicketName {
+  VIP
+  GENERAL
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TicketStatus {
+  OPEN
+  ONGOING
+  RESOLVED
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum USERS {
+  organizer
+  attendee
+}
+
+enum UserRole {
+  ADMIN
+  ORGANIZER
+}
+
+enum VerificationStatus {
+  PENDING
+  COMPLETED
+  REJECTED
+}
+
+enum eventWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}

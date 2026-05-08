@@ -10,7 +10,7 @@ export const handleChat = async (req, res) => {
 
     try {
         const location = (lat && lng) ? { lat, lng } : null;
-        console.log("📨 Received Chat Request:", { message, sessionId: currentSessionId, location });
+       // console.log("📨 Received Chat Request:", { message, sessionId: currentSessionId, location });
         const { stream, chatHistory, allHistories } = await RAGService.getAnswer(message, currentSessionId, location);
 
         // Set headers for streaming
