@@ -11,6 +11,11 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
+
+app.use('/', (req, res) => {
+    res.send('AI Chatbot is running')
+})
+
 // Register Routes
 app.use('/api', chatRoutes);
 
@@ -22,4 +27,4 @@ app.listen(PORT, () => {
 });
 
 // Keep process alive in this environment
-setInterval(() => {}, 1000000);
+setInterval(() => { }, 1000000);
