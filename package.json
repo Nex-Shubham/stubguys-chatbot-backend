@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "build": "shx mkdir -p dist && (shx cp -r src/assets dist/ || shx echo 'No assets folder') && (shx cp -r src/views dist/ || shx echo 'No views folder')"
+    "build": "prisma generate && shx mkdir -p dist && (shx cp -r src/assets dist/ || shx echo 'No assets folder') && (shx cp -r src/views dist/ || shx echo 'No views folder')",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
