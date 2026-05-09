@@ -12,12 +12,13 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000;
 
 
-app.use('/', (req, res) => {
-    res.send('AI Chatbot is running')
-})
-
 // Register Routes
 app.use('/api', chatRoutes);
+
+// Root Route
+app.get('/', (req, res) => {
+    res.send('AI Chatbot is running')
+})
 
 // Health Check
 app.get('/health', (req, res) => res.send('AI Chatbot is Healthy 🚀'));

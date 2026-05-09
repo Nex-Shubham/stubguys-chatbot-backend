@@ -26,8 +26,8 @@ class RAGService {
 
         try {
             const [events, faqs] = await Promise.all([
-                prisma.event.findMany({ take: 5, where: { status: 'PUBLISHED' }, orderBy: { createdAt: 'desc' } }),
-                prisma.fAQ.findMany({ take: 5, orderBy: { createdAt: 'desc' } })
+                prisma.event.findMany({ take: 3, where: { status: 'PUBLISHED' }, orderBy: { createdAt: 'desc' } }),
+                prisma.fAQ.findMany({ take: 2, orderBy: { createdAt: 'desc' } })
             ]);
 
             let dbContext = "\n--- Live Database Info ---\n";
@@ -76,7 +76,7 @@ class RAGService {
                 writeLog(`   - "${e.title}" is ${distance.toFixed(1)}km away`);
 
                 return distance <= radiusKm;
-            }).slice(0, 5);
+            }).slice(0, 3);
 
             if (nearby.length === 0) {
                 writeLog("❌ No events found within the radius.");

@@ -7,10 +7,11 @@ if (!process.env.GEMINI_API_KEY) {
 }
 
 export const chatModel = new ChatGoogleGenerativeAI({
-    model: "gemini-2.5-flash",
+    model: "gemini-2.5-flash-lite",
     apiKey: process.env.GEMINI_API_KEY,
     maxOutputTokens: 2048,
     maxRetries: 1,
+    temperature: 0.7,
 });
 
 export const geminiEmbeddings = new GoogleGenerativeAIEmbeddings({

@@ -30,7 +30,7 @@ export const handleChat = async (req, res) => {
             { role: "human", content: message },
             { role: "ai", content: fullResponse }
         ];
-        allHistories[currentSessionId] = newMessages.slice(-10);
+        allHistories[currentSessionId] = newMessages.slice(-5);
         RAGService.saveLocalHistory(allHistories);
 
         res.end(); // Close connection
