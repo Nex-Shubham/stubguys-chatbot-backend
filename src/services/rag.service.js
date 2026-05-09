@@ -26,8 +26,17 @@ class RAGService {
 
         try {
             const [events, faqs] = await Promise.all([
-                prisma.event.findMany({ take: 3, where: { status: 'PUBLISHED' }, orderBy: { createdAt: 'desc' } }),
-                prisma.fAQ.findMany({ take: 2, orderBy: { createdAt: 'desc' } })
+                prisma.event.findMany({ 
+                    take: 3, 
+                    where: { status: 'PUBLISHED' }, 
+                    orderBy: { createdAt: 'desc' },
+                    select: { id: true, title: true, date: true, description: true }
+                }),
+                prisma.fAQ.findMany({ 
+                    take: 2, 
+                    orderBy: { createdAt: 'desc' },
+                    select: { id: true, question: true, answer: true }
+                })
             ]);
 
             let dbContext = "\n--- Live Database Info ---\n";
@@ -61,7 +70,11 @@ class RAGService {
 
             const events = await prisma.event.findMany({
                 where: { status: 'PUBLISHED', Location: { isNot: null } },
-                include: { Location: true }
+                select: {
+                    id: true,
+                    title: true,
+                    Location: true
+                }
             });
 
             writeLog(`🔍 Checking ${events.length} published events...`);
