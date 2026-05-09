@@ -33,7 +33,7 @@ class RAGService {
             let dbContext = "\n--- Live Database Info ---\n";
             events.forEach(e => dbContext += `- Event: ${e.title} (${e.date || 'TBA'})\n`);
             faqs.forEach(f => dbContext += `- Q: ${f.question} | A: ${f.answer}\n`);
-            
+
             cachedDbContext = dbContext;
             lastDbCacheTime = now;
             return dbContext;
@@ -43,7 +43,7 @@ class RAGService {
     }
 
     // 📍 User location logic (Using Prisma)
-    static async fetchNearbyEvents(lat, lng, radiusKm = 2000) { 
+    static async fetchNearbyEvents(lat, lng, radiusKm = 2000) {
         const logFile = path.join(__dirname, '../../server.log');
         const writeLog = (msg) => {
             const time = new Date().toLocaleTimeString();
@@ -58,7 +58,7 @@ class RAGService {
 
         try {
             writeLog(`📍 USER LOCATION: Lat ${lat}, Lng ${lng} (Search Radius: ${radiusKm}km)`);
-            
+
             const events = await prisma.event.findMany({
                 where: { status: 'PUBLISHED', Location: { isNot: null } },
                 include: { Location: true }
@@ -71,7 +71,7 @@ class RAGService {
                 const eventLng = e.Location?.longitude;
 
                 if (eventLat === null || eventLat === undefined || eventLng === null || eventLng === undefined) return false;
-                
+
                 const distance = this.calculateDistance(lat, lng, eventLat, eventLng);
                 writeLog(`   - "${e.title}" is ${distance.toFixed(1)}km away`);
 
@@ -90,9 +90,9 @@ class RAGService {
                 writeLog(`      ✅ MATCH FOUND: ${e.title}`);
             });
             return ctx;
-        } catch (e) { 
+        } catch (e) {
             writeLog(`❌ Error: ${e.message}`);
-            return ""; 
+            return "";
         }
     }
 
@@ -100,8 +100,8 @@ class RAGService {
         const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
     static loadLocalHistory() {
@@ -111,13 +111,13 @@ class RAGService {
                 memoryHistoryCache = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
                 return memoryHistoryCache;
             }
-        } catch (e) {}
+        } catch (e) { }
         return {};
     }
 
     static saveLocalHistory(history) {
         memoryHistoryCache = history;
-        try { fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2)); } catch (e) {}
+        try { fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2)); } catch (e) { }
     }
 
     static async getAnswer(question, sessionId = "default", location = null) {
@@ -139,7 +139,7 @@ class RAGService {
                 });
                 const geoData = await geoRes.json();
                 locationName = geoData.display_name || `${location.lat}, ${location.lng}`;
-            } catch (e) {}
+            } catch (e) { }
         }
 
         const prompt = PromptTemplate.fromTemplate(`
